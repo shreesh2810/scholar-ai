@@ -4,18 +4,19 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, Loader2, Bot, Lightbulb, TestTube2, ChevronsRight } from 'lucide-react';
+import { Link, Loader2, Bot, Lightbulb, TestTube2, ChevronsRight, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { summarizePaper, SummarizePaperOutput } from '@/ai/flows/summarize-paper';
+import { extractPdfUrl } from '@/ai/flows/extract-pdf-url';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const formSchema = z.object({
-  pdfUrl: z.string().url({ message: 'Please enter a valid URL.' }),
+  paperUrl: z.string().url({ message: 'Please enter a valid URL.' }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -23,12 +24,13 @@ type FormValues = z.infer<typeof formSchema>;
 export function SummarizeClient() {
   const [analysis, setAnalysis] = useState<SummarizePaperOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('Analyzing...');
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      pdfUrl: '',
+      paperUrl: '',
     },
   });
 
@@ -36,13 +38,23 @@ export function SummarizeClient() {
     setIsLoading(true);
     setAnalysis(null);
     try {
-      const result = await summarizePaper({ pdfUrl: values.pdfUrl });
+      setLoadingMessage('Finding PDF link...');
+      const extractResult = await extractPdfUrl({ url: values.paperUrl });
+      
+      if (!extractResult || !extractResult.pdfUrl) {
+        throw new Error('Could not find a PDF link on the provided page.');
+      }
+
+      setLoadingMessage('Analyzing paper...');
+      const result = await summarizePaper({ pdfUrl: extractResult.pdfUrl });
       setAnalysis(result);
+
     } catch (error) {
-      console.error('Summarization error:', error);
+      console.error('Analysis error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
       toast({
         title: 'Error',
-        description: 'Failed to generate summary. Please check the link or try again.',
+        description: `Failed to generate summary. ${errorMessage}`,
         variant: 'destructive',
       });
     } finally {
@@ -61,14 +73,14 @@ export function SummarizeClient() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="pdfUrl"
+                name="paperUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>PDF URL</FormLabel>
+                    <FormLabel>Research Paper URL</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Link className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="https://arxiv.org/pdf/1706.03762" className="pl-10" {...field} />
+                        <Input placeholder="e.g., https://arxiv.org/abs/1706.03762" className="pl-10" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -77,7 +89,7 @@ export function SummarizeClient() {
               />
               <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isLoading ? 'Analyzing...' : 'Generate Analysis'}
+                {isLoading ? loadingMessage : 'Generate Analysis'}
               </Button>
             </form>
           </Form>
