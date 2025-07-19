@@ -12,11 +12,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SummarizePaperInputSchema = z.object({
-  pdfDataUri: z
-    .string()
-    .describe(
-      "A research paper in PDF format, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
+  pdfUrl: z.string().url().describe('A URL to a research paper in PDF format.'),
 });
 export type SummarizePaperInput = z.infer<typeof SummarizePaperInputSchema>;
 
@@ -45,7 +41,7 @@ List the key findings as an array of strings.
 Summarize the methodology.
 Provide the conclusion of the paper.
 
-Paper: {{media url=pdfDataUri}}`,
+Paper: {{media url=pdfUrl}}`,
 });
 
 const summarizePaperFlow = ai.defineFlow(

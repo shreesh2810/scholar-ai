@@ -4,29 +4,21 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UploadCloud, Loader2, FileText, Bot, Lightbulb, TestTube2, ChevronsRight } from 'lucide-react';
+import { Link, Loader2, Bot, Lightbulb, TestTube2, ChevronsRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { summarizePaper, SummarizePaperOutput } from '@/ai/flows/summarize-paper';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const formSchema = z.object({
-  pdfFile: z.instanceof(File).refine(file => file.type === 'application/pdf', 'Only PDF files are accepted.'),
+  pdfUrl: z.string().url({ message: 'Please enter a valid URL.' }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-async function fileToDataUri(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
 
 export function SummarizeClient() {
   const [analysis, setAnalysis] = useState<SummarizePaperOutput | null>(null);
@@ -35,23 +27,22 @@ export function SummarizeClient() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      pdfUrl: '',
+    },
   });
-
-  const { setValue, watch } = form;
-  const selectedFile = watch('pdfFile');
 
   const onSubmit = async (values: FormValues) => {
     setIsLoading(true);
     setAnalysis(null);
     try {
-      const pdfDataUri = await fileToDataUri(values.pdfFile);
-      const result = await summarizePaper({ pdfDataUri });
+      const result = await summarizePaper({ pdfUrl: values.pdfUrl });
       setAnalysis(result);
     } catch (error) {
       console.error('Summarization error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to generate summary. Please try again.',
+        description: 'Failed to generate summary. Please check the link or try again.',
         variant: 'destructive',
       });
     } finally {
@@ -63,54 +54,28 @@ export function SummarizeClient() {
     <div className="grid gap-8">
       <Card className="interactive-card">
         <CardHeader>
-          <CardTitle className="font-headline">Upload Paper</CardTitle>
+          <CardTitle className="font-headline">Analyze Paper from Link</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="pdfFile"
-                render={() => (
+                name="pdfUrl"
+                render={({ field }) => (
                   <FormItem>
+                    <FormLabel>PDF URL</FormLabel>
                     <FormControl>
-                      <div className="flex justify-center items-center w-full">
-                        <label
-                          htmlFor="dropzone-file"
-                          className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted"
-                        >
-                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <UploadCloud className="w-10 h-10 mb-4 text-muted-foreground" />
-                            <p className="mb-2 text-sm text-muted-foreground">
-                              <span className="font-semibold text-primary">Click to upload</span> or drag and drop
-                            </p>
-                            <p className="text-xs text-muted-foreground">PDF only (max 10MB)</p>
-                          </div>
-                          <input
-                            id="dropzone-file"
-                            type="file"
-                            className="hidden"
-                            accept="application/pdf"
-                            onChange={(e) => {
-                              if (e.target.files?.[0]) {
-                                setValue('pdfFile', e.target.files[0], { shouldValidate: true });
-                              }
-                            }}
-                          />
-                        </label>
+                      <div className="relative">
+                        <Link className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input placeholder="https://arxiv.org/pdf/1706.03762" className="pl-10" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              {selectedFile && (
-                <div className="flex items-center gap-2 p-2 rounded-md bg-muted text-sm">
-                  <FileText className="w-5 h-5 text-primary" />
-                  <span>{selectedFile.name}</span>
-                </div>
-              )}
-              <Button type="submit" disabled={isLoading || !selectedFile} className="w-full sm:w-auto">
+              <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLoading ? 'Analyzing...' : 'Generate Analysis'}
               </Button>
