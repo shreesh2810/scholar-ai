@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, Loader2, Bot, Lightbulb, TestTube2, ChevronsRight, Search } from 'lucide-react';
+import { Link, Loader2, Bot, Lightbulb, TestTube2, ChevronsRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { summarizePaper, SummarizePaperOutput } from '@/ai/flows/summarize-paper';
@@ -21,7 +21,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function SummarizeClient() {
+export function SummaryTab() {
   const [analysis, setAnalysis] = useState<SummarizePaperOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('Analyzing...');
@@ -67,6 +67,7 @@ export function SummarizeClient() {
       <Card className="interactive-card">
         <CardHeader>
           <CardTitle className="font-headline">Analyze Paper from Link</CardTitle>
+          <CardDescription>Paste a link to a research paper page (e.g., from arXiv, Google Scholar) to get started.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>

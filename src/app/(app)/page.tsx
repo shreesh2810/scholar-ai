@@ -1,14 +1,14 @@
 import { PageHeader } from '@/components/page-header';
-import { SummarizeClient } from './summarize-client';
+import { DashboardClient } from './dashboard-client';
 
 export default function DashboardPage() {
   return (
     <>
       <PageHeader
-        title="Smart Summaries"
-        description="Upload a research paper to get a structured summary."
+        title="Dashboard"
+        description="Your AI-powered academic paper analysis hub."
       />
-      <SummarizeClient />
+      <DashboardClient />
     </>
   );
 }

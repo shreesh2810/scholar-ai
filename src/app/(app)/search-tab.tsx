@@ -19,7 +19,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function LiteratureSearchClient() {
+export function SearchTab() {
   const [results, setResults] = useState<SemanticLiteratureSearchOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -73,7 +73,11 @@ export function LiteratureSearchClient() {
   return (
     <div className="space-y-8">
       <Card className="interactive-card">
-        <CardContent className="pt-6">
+        <CardHeader>
+          <CardTitle className="font-headline">Semantic Literature Search</CardTitle>
+          <CardDescription>Find semantically similar research papers using a natural language query.</CardDescription>
+        </CardHeader>
+        <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col sm:flex-row gap-4">
               <FormField

@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Search, Clock } from "lucide-react";
+import { LayoutDashboard, Clock } from "lucide-react";
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 
 const navItems = [
-  { href: "/", label: "Summaries", icon: LayoutDashboard },
-  { href: "/literature-search", label: "Literature Search", icon: Search },
+  { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/timeline", label: "Research Timeline", icon: Clock },
 ];
 
