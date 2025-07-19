@@ -54,7 +54,7 @@ export default function TimelinePage() {
         title="Research Timeline"
         description="A visual journey of your research activities and progress."
       />
-      <Card>
+      <Card className="interactive-card">
         <CardContent className="pt-6">
           <div className="relative">
             <div className="absolute left-6 top-0 h-full w-0.5 bg-border -translate-x-1/2"></div>

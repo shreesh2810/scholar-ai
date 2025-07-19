@@ -50,7 +50,7 @@ export function LiteratureSearchClient() {
   const renderSkeletons = () => (
     <div className="grid gap-4 md:grid-cols-2">
       {[...Array(4)].map((_, i) => (
-        <Card key={i}>
+        <Card key={i} className="interactive-card">
           <CardHeader>
             <Skeleton className="h-6 w-3/4" />
             <Skeleton className="h-4 w-1/2" />
@@ -72,7 +72,7 @@ export function LiteratureSearchClient() {
 
   return (
     <div className="space-y-8">
-      <Card>
+      <Card className="interactive-card">
         <CardContent className="pt-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col sm:flex-row gap-4">
@@ -107,7 +107,7 @@ export function LiteratureSearchClient() {
           {results.results.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2">
               {results.results.map((paper, index) => (
-                <Card key={index} className="flex flex-col">
+                <Card key={index} className="flex flex-col interactive-card">
                   <CardHeader>
                     <CardTitle className="font-headline text-lg">{paper.title}</CardTitle>
                   </CardHeader>
@@ -129,7 +129,7 @@ export function LiteratureSearchClient() {
               ))}
             </div>
           ) : (
-            <Card className="text-center py-12">
+            <Card className="text-center py-12 interactive-card">
               <CardContent>
                 <p>No results found. Try a different query.</p>
               </CardContent>

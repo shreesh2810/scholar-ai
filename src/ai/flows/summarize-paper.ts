@@ -21,7 +21,11 @@ const SummarizePaperInputSchema = z.object({
 export type SummarizePaperInput = z.infer<typeof SummarizePaperInputSchema>;
 
 const SummarizePaperOutputSchema = z.object({
-  summary: z.string().describe('A structured summary of the research paper.'),
+  title: z.string().describe('The title of the paper.'),
+  summary: z.string().describe('A one-paragraph summary of the paper.'),
+  keyFindings: z.array(z.string()).describe('A list of key findings from the paper.'),
+  methodology: z.string().describe('A summary of the methodology used in the paper.'),
+  conclusion: z.string().describe('The conclusion of the paper.'),
 });
 export type SummarizePaperOutput = z.infer<typeof SummarizePaperOutputSchema>;
 
@@ -33,7 +37,13 @@ const prompt = ai.definePrompt({
   name: 'summarizePaperPrompt',
   input: {schema: SummarizePaperInputSchema},
   output: {schema: SummarizePaperOutputSchema},
-  prompt: `You are an expert research assistant. You will summarize the key points of the research paper provided.
+  prompt: `You are an expert research assistant. You will analyze the provided research paper and extract key information.
+
+Provide the title of the paper.
+Provide a concise, single-paragraph summary.
+List the key findings as an array of strings.
+Summarize the methodology.
+Provide the conclusion of the paper.
 
 Paper: {{media url=pdfDataUri}}`,
 });
